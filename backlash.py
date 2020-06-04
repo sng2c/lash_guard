@@ -168,20 +168,8 @@ def backlash_compensate_auto(axes, input_data):
             axes['Y'].reset()
 
         if gcode.cmd in ['M425']:
-            if 'F' in gcode.params:
-                for sign in axes:
-                    axes[sign].correction = gcode.params['F']
-
-            for sign in axes:
-                if sign in gcode.params:
-                    axes[sign].lash = gcode.params[sign]
-
-            print("Applied ", gcode)
-            print_axes(axes)
-
-            # make comment M425
             gcode.cmd = None
-            gcode.rawdata = ';Backlash Compensation by ' + gcode.rawdata
+            gcode.rawdata = ';Omitting ' + gcode.rawdata
 
         yield gcode
 
