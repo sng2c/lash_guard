@@ -1,5 +1,5 @@
 import logging
-
+import decimal
 
 class Gcode:
     @classmethod
@@ -19,7 +19,7 @@ class Gcode:
 
     @classmethod
     def _parse_param(cls, token):
-        return token[0], float(token[1:])
+        return token[0], decimal.Decimal(token[1:])
 
     @classmethod
     def fromStr(cls, cmdstr):
@@ -52,12 +52,12 @@ class Gcode:
 
 class Axis:
     def __init__(self, lash=0.0, correction=1.0, offset=0.0, pos=0.0, direction=0, err=0.0):
-        self.pos = float(pos)
-        self.lash = float(lash)
-        self.error = float(err)
-        self.correction = float(correction)
+        self.pos = decimal.Decimal(pos)
+        self.lash = decimal.Decimal(lash)
+        self.error = decimal.Decimal(err)
+        self.correction = decimal.Decimal(correction)
         self.direction = direction
-        self.offset = float(offset)
+        self.offset = decimal.Decimal(offset)
 
     def calc_direction(self, newpos):
         delta = newpos - self.pos
@@ -152,15 +152,16 @@ def backlash_compensate_auto(axes, input_data):
             for sign in gcode.params:
                 if sign in axes:
                     lastdir = axes[sign].direction
+                    lastpos = axes[sign].pos
                     axes[sign].move_to(gcode.params[sign])
                     newdir = axes[sign].direction
-                    if newdir == 1 and newdir != lastdir:
+                    if newdir != lastdir:
                         yield Gcode(
-                            'G1', {sign: axes[sign].calc_pos()},
-                            ';go fwd')
+                            'G1', {sign: lastpos + axes[sign].calc_err()*lastdir},
+                            ';go reverse')
                         yield Gcode(
-                            'G1', {sign: axes[sign].pos},
-                            ';go bwd')
+                            'G1', {sign: lastpos},
+                            ';go back')
 
         if gcode.cmd in ['G28']:
             axes['X'].reset()
