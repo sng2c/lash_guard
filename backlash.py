@@ -146,34 +146,6 @@ def backlash_compensate(axes, input_data):
         yield gcode
 
 
-def backlash_compensate_auto(axes, input_data):
-    for gcode in Gcode.parse(input_data):
-        if gcode.cmd in ['G0', 'G1']:
-            for sign in gcode.params:
-                if sign in axes:
-                    lastdir = axes[sign].direction
-                    lastpos = axes[sign].pos
-                    axes[sign].move_to(gcode.params[sign])
-                    newdir = axes[sign].direction
-                    if newdir != lastdir:
-                        yield Gcode(
-                            'G1', {sign: lastpos + axes[sign].calc_err()*lastdir},
-                            ';go reverse')
-                        yield Gcode(
-                            'G1', {sign: lastpos},
-                            ';go back')
-
-        if gcode.cmd in ['G28']:
-            axes['X'].reset()
-            axes['Y'].reset()
-
-        if gcode.cmd in ['M425']:
-            gcode.cmd = None
-            gcode.rawdata = ';Omitting ' + gcode.rawdata
-
-        yield gcode
-
-
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
 
@@ -181,14 +153,13 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Backlash Compensator',
                                      usage='%(prog)s -x 0.6 -y 0.6 sample.gcode -o out.gcode')
-    parser.add_argument('-a', '--auto', help='AUTO compensation', action='store_true')
-    parser.add_argument('-x', '--x-dist', help='X_DISTANCE_MM', type=float, default=0.0)
-    parser.add_argument('--x-offset', help='X_OFFSET_MM', type=float, default=0.0)
-    parser.add_argument('-y', '--y-dist', help='Y_DISTANCE_MM', type=float, default=0.0)
-    parser.add_argument('--y-offset', help='Y_OFFSET_MM', type=float, default=0.0)
-    parser.add_argument('-z', '--z-dist', help='Z_DISTANCE_MM', type=float, default=0.0)
-    parser.add_argument('--z-offset', help='Z_OFFSET_MM', type=float, default=0.0)
-    parser.add_argument('-c', '--correction', help='CORRECTION', type=float, default=1.0)
+    parser.add_argument('-x', '--x-dist', help='X_DISTANCE_MM', type=str, default=0.0)
+    parser.add_argument('--x-offset', help='X_OFFSET_MM', type=str, default=0.0)
+    parser.add_argument('-y', '--y-dist', help='Y_DISTANCE_MM', type=str, default=0.0)
+    parser.add_argument('--y-offset', help='Y_OFFSET_MM', type=str, default=0.0)
+    parser.add_argument('-z', '--z-dist', help='Z_DISTANCE_MM', type=str, default=0.0)
+    parser.add_argument('--z-offset', help='Z_OFFSET_MM', type=str, default=0.0)
+    parser.add_argument('-c', '--correction', help='CORRECTION', type=str, default=1.0)
     parser.add_argument('input', help='INPUT G-code', type=str)
     parser.add_argument('-o', '--output', type=str, default='out.gcode')
     args = parser.parse_args()
@@ -203,7 +174,6 @@ if __name__ == '__main__':
     X_OFFSET = args.x_offset
     Y_OFFSET = args.y_offset
     Z_OFFSET = args.z_offset
-    ENABLE_AUTO = args.auto
 
     axes = {
         'X': Axis(lash=X_DISTANCE_MM, offset=X_OFFSET, correction=CORRECTION),
@@ -214,9 +184,5 @@ if __name__ == '__main__':
     print_axes(axes)
     with open(INPUT) as gcode_data:
         with open(OUTPUT, 'w') as output:
-            if ENABLE_AUTO:
-                for gcode in backlash_compensate_auto(axes, gcode_data):
-                    output.write(str(gcode) + "\n")
-            else:
-                for gcode in backlash_compensate(axes, gcode_data):
-                    output.write(str(gcode)+"\n")
+            for gcode in backlash_compensate(axes, gcode_data):
+                output.write(str(gcode)+"\n")
