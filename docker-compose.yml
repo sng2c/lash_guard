@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+  redis:
+    image: sickp/alpine-redis
+  web:
+    image: sng2c/alpine-nginx-php7-app-public
+    depends_on:
+      - redis
+    volumes:
+      - ".:/app"
+    environment:
+      - 'REDIS_HOST=redis'
+      - 'VIRTUAL_HOST=lash.app.gslump.com'
+      - 'LETSENCRYPT_HOST=lash.app.gslump.com'
+      - 'LETSENCRYPT_EMAIL=sng2nara@gmail.com'
+  worker:
+    dns: 8.8.8.8
+    build:
+      context: ./worker
+      dockerfile: Dockerfile
+    depends_on:
+      - redis
+    volumes:
+      - "./public/output:/data"
+      - "./public/tmp:/tmp"
+    environment:
+      - 'REDIS_HOST=redis'
+      - 'OUTPUT_DIR=/data'
+      - 'TMP_DIR=/tmp'
+  worker2:
+    dns: 8.8.8.8
+    build:
+      context: ./worker
+      dockerfile: ./Dockerfile2
+    depends_on:
+      - redis
+    volumes:
+      - "./public/output:/data"
+      - "./public/tmp:/tmp"
+    environment:
+      - 'REDIS_HOST=redis'
+      - 'OUTPUT_DIR=/data'
+      - 'TMP_DIR=/tmp'
+networks:
+  default:
+    external:
+      name: nginx-proxy
