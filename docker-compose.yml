@@ -1,8 +1,8 @@
-version: '3'
+version: '2'
 
 services:
   web:
-    image: sng2c/lash-guard-web
+    image: sng2c/lash-guard-web:v1
     environment:
       - 'REDIS_HOST=redis'
       - 'VIRTUAL_HOST=lash.app.gslump.com'
