@@ -47,7 +47,7 @@ class Gcode:
             return self.rawdata
 
     def __str__(self):
-        return ' '.join([self.cmd, *[k + str(round(self.params[k], 4)).rstrip('0').rstrip('.') for k in
+        return ' '.join([self.cmd, *[k + str(round(float(self.params[k]), 4)).rstrip('0').rstrip('.') for k in
                                      self.params], self.comment]) if self.cmd is not None else self.rawdata
 
 
@@ -59,6 +59,13 @@ class Axis:
         self.correction = decimal.Decimal(correction)
         self.direction = direction
         self.offset = decimal.Decimal(offset)
+        self.stack = []
+
+    def push(self, pos):
+        self.stack.append(pos)
+
+    def pop(self, pos):
+        return self.stack.pop()
 
     def calc_direction(self, newpos):
         delta = newpos - self.pos
@@ -112,8 +119,8 @@ def print_axes(axes):
         print("{}: {}".format(sign, axes[sign]))
 
 
-def backlash_compensate(axes, input_data):
-    for gcode in Gcode.parse(input_data):
+def backlash_compensate(axes, gcodes):
+    for gcode in gcodes:
         if gcode.cmd in ['G0', 'G1']:
             for sign in gcode.params:
                 if sign in axes:
@@ -147,10 +154,10 @@ def backlash_compensate(axes, input_data):
         yield gcode
 
 
-def backlash_compensate_auto(axes, input_data):
-    for gcode in Gcode.parse(input_data):
+def backlash_compensate_auto(axes, gcodes):
+    for gcode in gcodes:
         if gcode.cmd in ['G0', 'G1']:
-
+            gomoreGcode = Gcode('G1', {}, ';pass')
             for sign in gcode.params:
                 if sign in axes:
                     lastdir = axes[sign].direction
@@ -159,73 +166,71 @@ def backlash_compensate_auto(axes, input_data):
                     newdir = axes[sign].calc_direction(newpos)
                     if newdir == 1 and newdir != lastdir:
                         # 지나갔다가
-                        yield Gcode(
-                            'G0', {sign: newpos + axes[sign].calc_err() * newdir},
-                            ';more')
-                        yield Gcode(
-                            'G0', {sign: newpos},
-                            ';back')
-                        gcode.params[sign] = lastpos
-                        yield gcode
-                        yield Gcode(
-                            'G0', {sign: newpos},
-                            ';return')
+                        calc_pos = newpos + axes[sign].calc_err() * newdir
+                        gomoreGcode.params[sign] = calc_pos
+                        axes[sign].move_to(calc_pos)
                     axes[sign].move_to(newpos)
+
+            if bool(gomoreGcode.params):
+                yield gomoreGcode
 
         if gcode.cmd in ['G28']:
             axes['X'].reset()
             axes['Y'].reset()
-            yield gcode
 
         elif gcode.cmd in ['M425']:
             gcode.cmd = None
             gcode.rawdata = ';Omitting ' + gcode.rawdata
-            yield gcode
+
+        yield gcode
 
 
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
+'''
+위치가 같을때 리버스 잡히는거.
+G1 Y10 ;rev
+G1 X0 Y10 E10 
+G1 Y10 ;ret
+'''
 
-    import argparse
 
-    parser = argparse.ArgumentParser(description='Backlash Compensator',
-                                     usage='%(prog)s -x 0.6 -y 0.6 sample.gcode -o out.gcode')
-    parser.add_argument('-a', '--auto', help='AUTO compensation', action='store_true')
-    parser.add_argument('-x', '--x-dist', help='X_DISTANCE_MM', type=float, default=0.0)
-    parser.add_argument('--x-offset', help='X_OFFSET_MM', type=float, default=0.0)
-    parser.add_argument('-y', '--y-dist', help='Y_DISTANCE_MM', type=float, default=0.0)
-    parser.add_argument('--y-offset', help='Y_OFFSET_MM', type=float, default=0.0)
-    parser.add_argument('-z', '--z-dist', help='Z_DISTANCE_MM', type=float, default=0.0)
-    parser.add_argument('--z-offset', help='Z_OFFSET_MM', type=float, default=0.0)
-    parser.add_argument('-c', '--correction', help='CORRECTION', type=float, default=1.0)
-    parser.add_argument('input', help='INPUT G-code', type=str)
-    parser.add_argument('-o', '--output', type=str, default='out.gcode')
-    args = parser.parse_args()
+def make_one_direction(axes, gcodes):
+    for gcode in gcodes:
+        if gcode.cmd in ['G0', 'G1']:
+            hasE = 'E' in gcode.params
+            if hasE:  # 그릴때만 체크
+                reverseGcode = Gcode('G1', {}, ';rev')
+                resetGcode = Gcode('G1', {}, ';ret')
+                for sign in gcode.params:
+                    if sign in axes:
+                        lastdir = axes[sign].direction
+                        lastpos = axes[sign].pos
+                        newpos = gcode.params[sign]
+                        newdir = axes[sign].calc_direction(newpos)
 
-    INPUT = args.input
-    OUTPUT = args.output
+                        if newdir == 1:
+                            # 거꾸로
+                            resetGcode.params[sign] = newpos
+                            reverseGcode.params[sign] = newpos
+                            gcode.params[sign] = lastpos
 
-    CORRECTION = args.correction
-    X_DISTANCE_MM = args.x_dist
-    Y_DISTANCE_MM = args.y_dist
-    Z_DISTANCE_MM = args.z_dist
-    X_OFFSET = args.x_offset
-    Y_OFFSET = args.y_offset
-    Z_OFFSET = args.z_offset
-    ENABLE_AUTO = args.auto
+                        axes[sign].move_to(newpos)
 
-    axes = {
-        'X': Axis(lash=X_DISTANCE_MM, offset=X_OFFSET, correction=CORRECTION),
-        'Y': Axis(lash=Y_DISTANCE_MM, offset=Y_OFFSET, correction=CORRECTION),
-        'Z': Axis(lash=Z_DISTANCE_MM, offset=Z_OFFSET, correction=CORRECTION),
-    }
+                if bool(reverseGcode.params):
+                    yield reverseGcode
 
-    print_axes(axes)
-    with open(INPUT) as gcode_data:
-        with open(OUTPUT, 'w') as output:
-            if ENABLE_AUTO:
-                for gcode in backlash_compensate_auto(axes, gcode_data):
-                    output.write(str(gcode) + "\n")
-            else:
-                for gcode in backlash_compensate(axes, gcode_data):
-                    output.write(str(gcode) + "\n")
+                yield gcode
+
+                if bool(resetGcode.params):
+                    yield resetGcode
+
+                continue
+
+        if gcode.cmd in ['G28']:
+            axes['X'].reset()
+            axes['Y'].reset()
+
+        elif gcode.cmd in ['M425']:
+            gcode.cmd = None
+            gcode.rawdata = ';Omitting ' + gcode.rawdata
+
+        yield gcode

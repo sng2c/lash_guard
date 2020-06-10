@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Lash-guard{% endblock %}
+
+
+{% block body %}
+    <div class="container">
+        <h1>Gcode파일 백래쉬 사전 보정기</h1>
+        <form action="compensate" method="post" enctype="multipart/form-data">
+            백래쉬 반영률(0.0~1.0) <input type="text" name="correction" value="1.0"><br>
+            X 백래쉬(mm) <input type="text" name="x_dist" value="0.0"><br>
+            Y 백래쉬(mm) <input type="text" name="y_dist" value="0.0"><br>
+            Z 백래쉬(mm) <input type="text" name="z_dist" value="0.0"><br>
+            Gcode파일 <input type="file" name="gcode" class="form-control-file"><br>
+            <button class="btn btn-primary" type="submit">보정하기</button>
+        </form>
+    </div>
+{% endblock %}
