@@ -3,15 +3,64 @@
 
 
 {% block body %}
-    <div class="container">
-        <h1>Gcode파일 백래쉬 사전 보정기</h1>
-        <form action="compensate" method="post" enctype="multipart/form-data">
-            백래쉬 반영률(0.0~1.0) <input type="text" name="correction" value="1.0"><br>
-            X 백래쉬(mm) <input type="text" name="x_dist" value="0.0"><br>
-            Y 백래쉬(mm) <input type="text" name="y_dist" value="0.0"><br>
-            Z 백래쉬(mm) <input type="text" name="z_dist" value="0.0"><br>
-            Gcode파일 <input type="file" name="gcode" class="form-control-file"><br>
-            <button class="btn btn-primary" type="submit">보정하기</button>
-        </form>
-    </div>
+
+    <form action="compensate" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="inputCorrection">백래쉬 반영률</label>
+            <input type="text" id="inputCorrection" class="form-control" aria-describedby="correctionHelpBlock"
+                   name="correction"
+                   value="1.0"
+                   placeholder="1.0"
+            >
+{#            <small id="correctionHelpBlock" class="form-text text-muted">#}
+{#                백래쉬 반영률#}
+{#            </small>#}
+        </div>
+
+        <div class="form-group">
+            <label for="inputX">X축 백래쉬(mm)</label>
+            <input type="text" id="inputX" class="form-control" aria-describedby="xHelpBlock"
+                   name="x_dist" value="0.0"
+                   placeholder="0.0"
+            >
+{#            <small id="xHelpBlock" class="form-text text-muted">#}
+{#                X축 백래쉬#}
+{#            </small>#}
+        </div>
+
+        <div class="form-group">
+            <label for="inputY">Y축 백래쉬(mm)</label>
+            <input type="text" id="inputY" class="form-control" aria-describedby="yHelpBlock"
+                   name="y_dist" value="0.0"
+                   placeholder="0.0"
+            >
+{#            <small id="yHelpBlock" class="form-text text-muted">#}
+{#                Y축 백래쉬#}
+{#            </small>#}
+        </div>
+
+        <div class="form-group">
+            <label for="inputZ">Z축 백래쉬(mm)</label>
+            <input type="text" id="inputZ" class="form-control" aria-describedby="zHelpBlock"
+                   name="z_dist" value="0.0"
+                   placeholder="0.0"
+            >
+{#            <small id="zHelpBlock" class="form-text text-muted">#}
+{#                Z축 백래쉬#}
+{#            </small>#}
+        </div>
+
+        <div class="form-group">
+            <label for="inputGcode">Gcode 파일선택</label>
+            <input type="file" id="inputGcode" aria-describedby="gcodeHelpBlock"
+                   name="gcode" class="form-control-file">
+{#            <small id="gcodeHelpBlock" class="form-text text-muted">#}
+{#                Gcode 파일의 선택#}
+{#            </small>#}
+        </div>
+
+
+        <button class="btn btn-primary" type="submit">보정하기</button>
+    </form>
+
 {% endblock %}
