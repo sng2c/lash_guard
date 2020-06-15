@@ -27,12 +27,12 @@ def compensate():
     Z_DISTANCE_MM = request.form['z_dist']
     # X_OFFSET = request.form['x_offset']
     # Y_OFFSET = request.form['y_offset']
-    # Z_OFFSET = request.form['z_offset']
+    Z_OFFSET = request.form['z_offset']
 
     axes = {
         'X': Axis(lash=X_DISTANCE_MM, correction=CORRECTION),
         'Y': Axis(lash=Y_DISTANCE_MM, correction=CORRECTION),
-        'Z': Axis(lash=Z_DISTANCE_MM, correction=CORRECTION),
+        'Z': Axis(lash=Z_DISTANCE_MM, correction=CORRECTION, offset=Z_OFFSET),
     }
 
     gcodes = Gcode.parse((l.decode() for l in INPUT))
