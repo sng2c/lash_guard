@@ -3,7 +3,8 @@ from flask import render_template, request, stream_with_context, Response
 
 from backlash import *
 
-
+import meinheld
+meinheld.set_max_content_length(2**10 * 2**10 * 2**10 * 1) # 1 GB
 
 app = Flask(__name__)
 # app.config['TEMPLATES_AUTO_RELOAD'] = True
