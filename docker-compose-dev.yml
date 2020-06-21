@@ -7,3 +7,5 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    environment:
+      - 'LOG_LEVEL=debug'
