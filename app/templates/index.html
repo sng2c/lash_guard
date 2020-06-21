@@ -49,6 +49,18 @@
 {#                Z축 백래쉬#}
 {#            </small>#}
         </div>
+        
+        <div class="form-group">
+            <label for="inputZoffset">Z축 오프셋(mm)</label>
+            <input type="text" id="inputZoffset" class="form-control" aria-describedby="zoffsetHelpBlock"
+                   name="z_offset" value="0.0"
+                   placeholder="0.0"
+            >
+            <small id="zoffsetHelpBlock" class="form-text text-muted">
+                Z축 오프셋은 미세한 레벨링 보정이 필요할 때 사용합니다.
+                예를 들어, 0.15로 입력하면 모든 Z좌표에 0.15가 더해지게 됩니다.
+            </small>
+        </div>
 
         <div class="form-group">
             <label for="inputGcode">Gcode 파일선택</label>
