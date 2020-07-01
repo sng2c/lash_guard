@@ -1,74 +1,113 @@
 {% extends 'base.html' %}
-{% block title %}Lash-guard{% endblock %}
+{% block title %}Lash-guard for PICO{% endblock %}
+{% block titleBody %}Lash-guard <small>for</small> PICO{% endblock %}
 
 
 {% block body %}
 
     <form action="compensate" method="post" enctype="multipart/form-data">
-        <div class="form-group">
-            <label for="inputCorrection">백래쉬 반영률</label>
-            <input type="text" id="inputCorrection" class="form-control" aria-describedby="correctionHelpBlock"
-                   name="correction"
-                   value="1.0"
-                   placeholder="1.0"
-            >
-{#            <small id="correctionHelpBlock" class="form-text text-muted">#}
-{#                백래쉬 반영률#}
-{#            </small>#}
+        <div class="form-group row">
+            <label for="inputCorrection" class="col-sm-3 col-md-2  col-form-label">백래쉬 반영률</label>
+            <div class="col-sm-9 col-md-10">
+                <div class="input-group mb-3">
+
+                    <input type="text" id="inputCorrection" class="form-control text-right" aria-describedby="correctionHelpBlock"
+                           name="correction"
+                           value="1.0"
+                           placeholder="1.0"
+                    >
+                </div>
+                {#            <small id="correctionHelpBlock" class="form-text text-muted">#}
+                {#                백래쉬 반영률#}
+                {#            </small>#}
+            </div>
         </div>
 
-        <div class="form-group">
-            <label for="inputX">X축 백래쉬(mm)</label>
-            <input type="text" id="inputX" class="form-control" aria-describedby="xHelpBlock"
-                   name="x_dist" value="0.0"
-                   placeholder="0.0"
-            >
-{#            <small id="xHelpBlock" class="form-text text-muted">#}
-{#                X축 백래쉬#}
-{#            </small>#}
+        <div class="form-group row">
+            <label for="inputX" class="col-sm-3 col-md-2 col-form-label">X축 백래쉬</label>
+            <div class="col-sm-9 col-md-10">
+                <div class="input-group mb-3">
+
+                    <input type="text" id="inputX" class="form-control text-right" aria-describedby="xHelpBlock"
+                           name="x_dist" value="0.0"
+                           placeholder="0.0"
+                    >
+                    <div class="input-group-append">
+                        <span class="input-group-text">mm</span>
+                    </div>
+                </div>
+            </div>
+            {#            <small id="xHelpBlock" class="form-text text-muted">#}
+            {#                X축 백래쉬#}
+            {#            </small>#}
         </div>
 
-        <div class="form-group">
-            <label for="inputY">Y축 백래쉬(mm)</label>
-            <input type="text" id="inputY" class="form-control" aria-describedby="yHelpBlock"
-                   name="y_dist" value="0.0"
-                   placeholder="0.0"
-            >
-{#            <small id="yHelpBlock" class="form-text text-muted">#}
-{#                Y축 백래쉬#}
-{#            </small>#}
+        <div class="form-group row">
+            <label for="inputY" class="col-sm-3 col-md-2  col-form-label">Y축 백래쉬</label>
+            <div class="col-sm-9 col-md-10">
+                <div class="input-group mb-3">
+
+                    <input type="text" id="inputY" class="form-control text-right" aria-describedby="yHelpBlock"
+                           name="y_dist" value="0.0"
+                           placeholder="0.0"
+                    >
+                    <div class="input-group-append">
+                        <span class="input-group-text">mm</span>
+                    </div>
+                </div>
+            </div>
+            {#            <small id="yHelpBlock" class="form-text text-muted">#}
+            {#                Y축 백래쉬#}
+            {#            </small>#}
         </div>
 
-        <div class="form-group">
-            <label for="inputZ">Z축 백래쉬(mm)</label>
-            <input type="text" id="inputZ" class="form-control" aria-describedby="zHelpBlock"
-                   name="z_dist" value="0.0"
-                   placeholder="0.0"
-            >
-{#            <small id="zHelpBlock" class="form-text text-muted">#}
-{#                Z축 백래쉬#}
-{#            </small>#}
-        </div>
-        
-        <div class="form-group">
-            <label for="inputZoffset">Z축 오프셋(mm)</label>
-            <input type="text" id="inputZoffset" class="form-control" aria-describedby="zoffsetHelpBlock"
-                   name="z_offset" value="0.0"
-                   placeholder="0.0"
-            >
-            <small id="zoffsetHelpBlock" class="form-text text-muted">
-                Z축 오프셋은 미세한 레벨링 보정이 필요할 때 사용합니다.
-                예를 들어, 0.15로 입력하면 모든 Z좌표에 0.15가 더해지게 됩니다.
-            </small>
+        <div class="form-group row">
+            <label for="inputZ" class="col-sm-3 col-md-2  col-form-label">Z축 백래쉬</label>
+            <div class="col-sm-9 col-md-10">
+                <div class="input-group mb-3">
+                    <input type="text" id="inputZ" class="form-control text-right" aria-describedby="zHelpBlock"
+                           name="z_dist" value="0.0"
+                           placeholder="0.0"
+                    >
+                    <div class="input-group-append">
+                        <span class="input-group-text">mm</span>
+                    </div>
+                </div>
+            </div>
+            {#            <small id="zHelpBlock" class="form-text text-muted">#}
+            {#                Z축 백래쉬#}
+            {#            </small>#}
         </div>
 
-        <div class="form-group">
-            <label for="inputGcode">Gcode 파일선택</label>
+        <div class="form-group row">
+            <label for="inputZoffset" class="col-sm-3 col-md-2  col-form-label">Z축 오프셋</label>
+            <div class="col-sm-9 col-md-10">
+                <div class="input-group mb-3">
+                    <input type="text" id="inputZoffset" class="form-control text-right" aria-describedby="zoffsetHelpBlock"
+                           name="z_offset" value="0.0"
+                           placeholder="0.0"
+                    >
+                    <div class="input-group-append">
+                        <span class="input-group-text">mm</span>
+                    </div>
+                </div>
+
+                <small id="zoffsetHelpBlock" class="form-text text-muted">
+                    Z축 오프셋은 미세한 레벨링 보정이 필요할 때 사용합니다.
+                    예를 들어, 0.15로 입력하면 모든 Z좌표에 0.15가 더해지게 됩니다.
+                </small>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label for="inputGcode" class="col-sm-3 col-md-2  col-form-label">Gcode 파일선택</label>
+            <div class="col-sm-9 col-md-10">
             <input type="file" id="inputGcode" aria-describedby="gcodeHelpBlock"
                    name="gcode" class="form-control-file">
-{#            <small id="gcodeHelpBlock" class="form-text text-muted">#}
-{#                Gcode 파일의 선택#}
-{#            </small>#}
+            </div>
+            {#            <small id="gcodeHelpBlock" class="form-text text-muted">#}
+            {#                Gcode 파일의 선택#}
+            {#            </small>#}
         </div>
 
 
