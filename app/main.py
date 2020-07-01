@@ -1,5 +1,9 @@
+import unicodedata
+from collections import OrderedDict
+
 from flask import Flask
-from flask import render_template, request, stream_with_context, Response
+from flask import render_template, request, stream_with_context, Response, send_file
+from werkzeug.urls import url_quote
 
 from backlash import *
 
@@ -40,7 +44,16 @@ def compensate():
                     mimetype="text/plain",
                     content_type='application/octet-stream'
                     )
-    resp.headers["Content-Disposition"] = f"attachment; filename={newfname}"
+    filenames = OrderedDict()
+    try:
+        filename = newfname.encode('latin-1')
+    except UnicodeEncodeError:
+        filenames['filename'] = unicodedata.normalize('NFKD', newfname).encode('latin-1', 'ignore')
+        filenames['filename*'] = "UTF-8''{}".format(url_quote(newfname))
+    else:
+        filenames['filename'] = filename
+
+    resp.headers.add("Content-Disposition", "attachment", **filenames)
     return resp
 
 
