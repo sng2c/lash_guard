@@ -2,9 +2,8 @@ version: '2'
 
 services:
   web:
-    image: sng2c/lash-guard-web:v1
+    image: sng2c/lash-guard-web:latest
     environment:
-      - 'REDIS_HOST=redis'
       - 'VIRTUAL_HOST=lash.app.gslump.com'
       - 'LETSENCRYPT_HOST=lash.app.gslump.com'
       - 'LETSENCRYPT_EMAIL=sng2nara@gmail.com'
